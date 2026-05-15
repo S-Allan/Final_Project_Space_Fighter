@@ -40,12 +40,17 @@ public:
 
 	/** @brief Load a specific level.
 		@param levelIndex The index of the level to load. */
-	virtual void LoadLevel(const int levelIndex);
+	virtual void GameplayScreen::LoadLevel(const int levelIndex);
+	void GameplayScreen::AdvanceLevel();
+	void GameplayScreen::CompleteGame();
 
-
+	bool IsTransitioning() const { return m_isTransitioning; }
 private:
 
-	int m_levelIndex = 0;
+	int m_levelIndex;
+	int m_pendingLevelIndex = -1;
+
+	bool m_isTransitioning = false;
 
 	Level *m_pLevel = nullptr;
 

@@ -16,6 +16,10 @@ class Level
 
 public:
 
+	void QueueEnemyDestruction(); //prototype for QueueEnemyDestruction.
+	void ProcessPendingDestructions(); //prototype for ProcessPendingDestruction.
+
+
 	/** @brief Instantiate a level object. */
 	Level();
 	virtual ~Level();
@@ -109,8 +113,15 @@ public:
 		return pClosest;
 	}
 
+	virtual bool IsComplete() const { return m_isComplete; } //prototype for checking for the end of the level.
+	void IncrementEnemiesDestroyed(); //prototype for incrementing the enemies destroyed.
+
 
 protected:
+
+	int m_totalEnemies = 0; //initialize the variable for counting the enemies
+	int m_enemiesDestroyed = 0; //initialize the variable for counting the enemies that are destroyed.
+	bool m_isComplete = false; //initialize the variable for flagging the end of the level. Set to false so the program knows the level is still ongoing.
 
 	/** @brief Get a pointer to the collision manager.
 		@return A pointer to the collision manager. */
@@ -128,9 +139,14 @@ protected:
 		@return A pointer to the audio sample to play. */
 	virtual AudioSample* GetBackgroundAudio() { return m_pAudio; }
 
-private:
+	virtual void UponEnemyDestroyed();
 
-	static std::vector<Explosion *> s_explosions;
+
+private:
+	std::vector<std::function<void()>> m_pendingCallbacks; //creates a vector m_pendingCallbacks to temporarily store destructions to be processed later
+	bool m_isProcessingDestruction = false; //initialize the variable m_isProcessingDestruction. This will only be true in the function ProcessPendingDestructions.
+	
+	static std::vector<Explosion *> s_explosions; //static vector that stores pointers to Explosion objects.
 	//std::vector<Explosion *>::iterator m_explosionIt;
 
 	CollisionManager* m_pCollisionManager = nullptr;
@@ -163,5 +179,6 @@ private:
 	virtual unsigned int GetTotalSectorCount() const { return m_totalSectorCount; }
 
 	virtual std::vector<GameObject*>* GetSectors() { return m_pSectors; }
+
 
 };

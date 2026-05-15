@@ -2,22 +2,28 @@
 #include "Ship.h"
 #include "Level.h"
 
-
+// Constructor: Initialize the Ship with base properties
 Ship::Ship()
 {
+	// Set initial position to the origin
 	SetPosition(0, 0);
+	// Set collision detection radius to 10 units
 	SetCollisionRadius(10);
 
+	// Initialize ship-specific properties
 	Initialize();
 }
 
+// Update: Update all attached items each frame
 void Ship::Update(const GameTime& gameTime)
 {
+	// Update all attachments (weapons, engines, etc.)
 	for (const auto& pair : m_attachments)
 	{
 		pair.second->Update(gameTime);
 	}
 
+	// Call parent class update
 	GameObject::Update(gameTime);
 }
 

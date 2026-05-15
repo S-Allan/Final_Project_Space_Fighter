@@ -5,9 +5,9 @@
 /** @brief The first level of the game. */
 class Level01 :	public Level
 {
-
+private:
+	int m_enemyCount = 0;
 public:
-	
 	/** @brief Instantiate a level object. */
 	Level01() { }
 	virtual ~Level01() { }

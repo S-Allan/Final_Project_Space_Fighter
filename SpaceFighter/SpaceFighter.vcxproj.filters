@@ -101,6 +101,12 @@
     <ClCompile Include="Weapon.cpp">
       <Filter>Source Files\Game Objects\Weapons</Filter>
     </ClCompile>
+    <ClCompile Include="Boss.cpp">
+      <Filter>Source Files\Game Objects\Ships</Filter>
+    </ClCompile>
+    <ClCompile Include="BossAmmo.cpp">
+      <Filter>Source Files\Game Objects\Ships</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainMenuScreen.h">
@@ -156,6 +162,12 @@
     </ClInclude>
     <ClInclude Include="Explosion.h">
       <Filter>Source Files\Game Objects\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
+      <Filter>Source Files\Game Objects\Ships</Filter>
+    </ClInclude>
+    <ClInclude Include="BossAmmo.h">
+      <Filter>Source Files\Game Objects\Ships</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

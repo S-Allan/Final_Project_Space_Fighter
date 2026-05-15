@@ -28,8 +28,48 @@ void PlayerCollidesWithEnemy(GameObject *pObject1, GameObject *pObject2)
 	pEnemyShip->Hit(std::numeric_limits<float>::max());
 }
 
+void Level::UponEnemyDestroyed()
+{
+	m_enemiesDestroyed++; //count the amount of enemies that have either been destroyed or fell of the map
+
+	//check if all the enemies have been destroyed.
+	if (!m_isComplete && m_enemiesDestroyed >= m_totalEnemies && m_totalEnemies > 0) 
+	{
+		m_isComplete = true; //tells the program that the level has been completed
+
+		//Uses m_pGameplayScreen to the next level.
+		if (m_pGameplayScreen)
+		{
+			m_pGameplayScreen->AdvanceLevel(); //sends player to the next level
+		}
+	}
+}
+
+void Level::IncrementEnemiesDestroyed()
+{
+	UponEnemyDestroyed();
+}
+
+void Level::QueueEnemyDestruction()
+{
+	//adds a callback function to the queue. doesn't allow immediate destruction or processing allowing a work around the exemption.
+	m_pendingCallbacks.push_back([this]() {UponEnemyDestroyed(); });
+}
+void Level::ProcessPendingDestructions()
+{
+	if (m_pendingCallbacks.empty()) return; //if there is nothing pending, exit the function
+	m_isProcessingDestruction = true; //if something was found, set to true.
+	auto callbacks = std::move(m_pendingCallbacks); //transfers the queue to a new varible.
+	m_pendingCallbacks.clear(); //clears m_pendingCallbacks so it can be added to again.
+	for (auto& callback : callbacks) 
+	{
+		callback(); //process copies.
+	}
+	m_isProcessingDestruction = false; //sets the flag for m_isProcessingDestruction back to false after processing the pending destructions.
+}
 
 Level::Level()
+	:m_totalEnemies(0), m_enemiesDestroyed(0), m_isComplete(false) //initialize variables.
 {
 	m_sectorSize.X = 64;
 	m_sectorSize.Y = 64;
@@ -72,11 +112,15 @@ Level::Level()
 	pC->AddCollisionType(playerShip, enemyShip, PlayerCollidesWithEnemy);
 }
 
+// Destructor: Clean up all allocated resources
 Level::~Level()
 {
+	// Delete the sector array
 	delete[] m_pSectors;
+	// Delete the collision manager
 	delete m_pCollisionManager;
-	
+
+	// Delete all game objects
 	m_gameObjectIt = m_gameObjects.begin();
 	for (; m_gameObjectIt != m_gameObjects.end(); m_gameObjectIt++)
 	{
@@ -117,12 +161,17 @@ void Level::HandleInput(const InputState& input)
 
 void Level::Update(const GameTime& gameTime)
 {
+	ProcessPendingDestructions(); //got an exception when transistioning levels. This was added to process pending destructions prior to update.
+
+	if (m_isComplete) return; 
+
 	for (unsigned int i = 0; i < m_totalSectorCount; i++)
 	{
 		m_pSectors[i].clear();
 	}
 
 	m_gameObjectIt = m_gameObjects.begin();
+	
 	for (; m_gameObjectIt != m_gameObjects.end(); m_gameObjectIt++)
 	{
 		GameObject *pGameObject = (*m_gameObjectIt);
@@ -139,9 +188,18 @@ void Level::Update(const GameTime& gameTime)
 	
 	for (Explosion *pExplosion : s_explosions) pExplosion->Update(gameTime);
 
-	if (!m_pPlayerShip->IsActive()) GetGameplayScreen()->Exit();
-}
+	ProcessPendingDestructions(); //This was added to process destructions that happened in the update.
 
+	//for whatever reason, after I added the level transistion, the level continued even after the player died. This is to account for that.
+	if (!m_isComplete && m_pPlayerShip && !m_pPlayerShip->IsActive()) 
+	{
+		m_isComplete = true;
+		if (m_pGameplayScreen)
+		{
+			m_pGameplayScreen->Exit();
+		}
+	}
+}
 
 void Level::UpdateSectorPosition(GameObject *pGameObject)
 {
@@ -233,14 +291,19 @@ void Level::CheckCollisions(std::vector<GameObject *> &gameObjects)
 	}
 }
 
+// Draw: Render the level background, game objects, and effects
 void Level::Draw(SpriteBatch& spriteBatch)
 {
+	// Start normal sprite batch drawing
 	spriteBatch.Begin();
 
+	// Get current alpha value for fade effects
 	const float alpha = GetGameplayScreen()->GetAlpha();
 
+	// Draw the background
 	if (m_pBackground) spriteBatch.Draw(m_pBackground, Vector2::ZERO, Color::WHITE * alpha);
 
+	// Draw all game objects
 	m_gameObjectIt = m_gameObjects.begin();
 	for (; m_gameObjectIt != m_gameObjects.end(); m_gameObjectIt++)
 	{

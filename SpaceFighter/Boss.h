@@ -1,21 +1,20 @@
-
 #pragma once
 
 #include "EnemyShip.h"
 
 /** @brief Represents an enemy ship that is biological in nature. */
-class BioEnemyShip : public EnemyShip
+class Boss : public EnemyShip
 {
 
 public:
 
 	/** @brief Creates a new instance of BioEnemyShip. */
-	BioEnemyShip();
-	virtual ~BioEnemyShip() { }
+	Boss();
+	virtual ~Boss() {}
 
 	/** @brief Sets the texture that will be used to render the enemy ship.
 		@param pTexture A pointer to the texture. */
-	virtual void SetTexture(Texture *pTexture) { m_pTexture = pTexture; }
+	virtual void SetTexture(Texture* pTexture) { m_pTexture = pTexture; }
 
 	/** @brief Updates the enemy ship.
 		@param gameTime A reference to the game time object. */
@@ -24,10 +23,10 @@ public:
 	/** @brief Draws the enemy ship.
 		@param spriteBatch A reference to the game's sprite batch, used for rendering. */
 	virtual void Draw(SpriteBatch& spriteBatch);
-	virtual void Hit(float damage) override;
+	void Boss::Hit(float damage); //prototyping new function tracking the boss's destruction.
 
 private:
 
-	Texture *m_pTexture = nullptr;
+	Texture* m_pTexture = nullptr;
 
 };

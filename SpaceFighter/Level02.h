@@ -5,6 +5,8 @@
 /** @brief The second level of the game. */
 class Level02 : public Level
 {
+private:
+	int m_enemyCount = 1;
 
 public:
 
